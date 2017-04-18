@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import sys
+reload(sys)
+sys.setdefaultencoding( "utf-8" )
+
 from bs4 import BeautifulSoup
 import subprocess
 import time
@@ -10,6 +14,7 @@ import urllib
 import simplejson
 import random
 
+flag = False
 pathMap = {
         'xiErQi':'http://www.webapi.ziroom.com/v7/room/list.json?sign=70130d9703871f160f0243592eacae17&size=10&timestamp=1492419592&feature=3&os=android%3A7.0&network=WIFI&sign_open=1&app_version=5.2.0&price=%2C3400&imei=354112070288845&ip=10.33.73.63&uid=d41432db-068e-f467-f6c9-99d7b6de009b&city_code=110000&sort=2&page=1&keywords=%E8%A5%BF%E4%BA%8C%E6%97%97&model=Nexus+6',
         'shangDi':'http://www.webapi.ziroom.com/v7/room/list.json?sign=3786e77103639fc299450c628ced7788&size=10&timestamp=1492420810&feature=3&os=android%3A7.0&network=WIFI&sign_open=1&app_version=5.2.0&price=%2C&imei=354112070288845&ip=10.33.73.63&uid=d41432db-068e-f467-f6c9-99d7b6de009b&city_code=110000&sort=2&page=1&keywords=%E4%B8%8A%E5%9C%B0&model=Nexus+6',
@@ -33,7 +38,7 @@ def sendMsg(msgContent):
         "toparty" : "",
         "totag":"",
         "msgtype":"text",
-        "agentid":"0",
+        "agentid": 0,
         "text":{
             "content":msgContent
         }
@@ -51,9 +56,12 @@ def getHouses():
         for room in rooms:
             cnt = RoomMap.get(room['id'], 0)
             if cnt == 0:
-                print 'new'
-                RoomMap[room['id']] =  1
-                sendMsg(label +  room['id'])
+                if flag == False:
+                    print 'new'
+                    RoomMap[room['id']] =  1
+                    sendMsg(label + "_" + room['id'] + "_price:" + str(room['price']) + "_resblock:" + room['name'].decode('utf8')[0:8].encode('utf8'))
+                else:
+                    RoomMap[room['id']] =  1
             else:
                 print room['id']
                 print cnt
@@ -65,6 +73,7 @@ def getHouses():
 def polling():
     while(True):
         getHouses()
+        flag = True
         time.sleep(random.randint(3,15))
 
 if __name__ == '__main__':
